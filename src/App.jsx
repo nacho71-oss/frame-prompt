@@ -11,29 +11,65 @@ import { buildUserMessage } from './lib/buildUserMessage.js';
 import { getModel } from './lib/models.js';
 
 // ── Default variable state (all null = unset) ──────────────
+// v2: expanded with all new variables from the full restructure.
+// localStorage key bumped to frame_session_v2 — old sessions won't partially break.
 const DEFAULT_VARIABLES = {
-  // Core
+  // ── CORE ────────────────────────────────────────────────
   shotFraming: null,
+  aspectRatio: null,
+
+  // SUBJECT sub-group (static only in UI — both modes in logic)
+  subjectOrientation: null,
+  subjectPosture: null,
+
+  // LIGHTING sub-group
   lightQuality: null,
-  lensCharacter: null,
-  colorGrade: null,
+  lightDirection: null,
+  lightDirectionSide: null,   // 'L' | 'R' | null — qualifier for directional options
+  lightingSetup: null,
+  lightSourceColor: null,     // renamed from colorTemperature
+
+  // ATMOSPHERE sub-group
+  atmosphericDensity: null,
+
+  // Core remainder
+  lensCharacter: null,        // multi-select → array or null
+  colorGrade: null,           // multi-select → array or null
   cameraAngle: null,
-  // Video
+  emotionalRegister: null,
+
+  // ── VIDEO MOTION (video only) ────────────────────────────
   cameraMovement: null,
   operatorWeight: null,
-  motionSpeed: null,
-  // Advanced
+  playbackFeel: null,         // renamed from motionSpeed
+  slowMotionFPS: null,
+  motionBlurVideo: null,      // slider 0–4, video mode placement
+  lensBreathing: null,        // moved from lensQualities, video only
+  subjectBehavior: null,      // multi-select → array or null
+  secondaryMotion: null,      // multi-select → array or null
+  audioDirection: null,       // model-gated: only for audioCapable models
+
+  // ── ADVANCED ────────────────────────────────────────────
   focalLength: null,
   apertureFeel: null,
   sensorStock: null,
-  colorTemperature: null,
-  framingStyle: null,
-  lensQualities: null,
+  compositionalIntent: null,  // renamed from framingStyle, multi-select
+  lensQualities: null,        // multi-select, Breathing removed
   timeOfDay: null,
+  shadowQuality: null,
+  grainTexture: null,
+  depthLayers: null,
+  practicalLights: null,      // multi-select → array or null
+  motionBlurStatic: null,     // slider 0–4, static mode placement
+
+  // ── COLOR PALETTE (own section) ─────────────────────────
+  // Stored as { primary: '#hex', active: ['#hex', '#hex', ...] } or null
+  colorPalette: null,
 };
 
 // ── localStorage helpers ───────────────────────────────────
-const LS_KEY = 'frame_session_v1';
+// v2: bumped key so old v1 sessions don't partially hydrate new state shape
+const LS_KEY = 'frame_session_v2';
 
 function loadSession() {
   try {
@@ -91,6 +127,25 @@ export default function App() {
     setVariables((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  // ── Mode switch: clear video-only variables when switching to static ──
+  const handleModeChange = useCallback((newMode) => {
+    setMode(newMode);
+    if (newMode === 'static') {
+      setVariables((prev) => ({
+        ...prev,
+        cameraMovement: null,
+        operatorWeight: null,
+        playbackFeel: null,
+        slowMotionFPS: null,
+        motionBlurVideo: null,
+        lensBreathing: null,
+        subjectBehavior: null,
+        secondaryMotion: null,
+        audioDirection: null,
+      }));
+    }
+  }, []);
+
   // ── Generate prompt ────────────────────────────────────────
   async function generate() {
     if (!baseDescription.trim()) return;
@@ -142,7 +197,7 @@ export default function App() {
     <div className="app">
       <Header
         mode={mode}
-        setMode={setMode}
+        setMode={handleModeChange}
         modelId={modelId}
         setModelId={setModelId}
       />
@@ -161,6 +216,7 @@ export default function App() {
           onChange={handleVarChange}
           baseDescription={baseDescription}
           onBaseDescChange={setBaseDescription}
+          modelId={modelId}
         />
 
         {/* Right: Output panel */}
