@@ -159,7 +159,7 @@
   grid-template-rows: 1fr;
   overflow: hidden;
   gap: var(--panel-gap);
-  background: var(--border-subtle); /* gap color via background trick */
+  background: var(--border-subtle);
 }
 
 /* ─── Panel Base ──────────────────────────────────────────── */
@@ -863,3 +863,146 @@
 .opacity-50 { opacity: 0.5; }
 .mt-2 { margin-top: var(--space-2); }
 .mt-3 { margin-top: var(--space-3); }
+
+/* ─── Sub-groups (SUBJECT / LIGHTING / ATMOSPHERE) ───────── */
+.subgroup {
+  margin-top: var(--space-4);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--border-subtle);
+}
+
+.subgroup-header {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-3);
+  margin-top: 0;
+  opacity: 0.5;
+  display: block;
+}
+
+/* ─── L/R Side Qualifier ──────────────────────────────────── */
+.lr-qualifier {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding-left: var(--space-1);
+}
+
+.lr-label {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+}
+
+.pill-sm {
+  padding: 2px var(--space-2);
+  font-size: var(--text-xs);
+}
+
+/* ─── Kelvin Gradient Bar ─────────────────────────────────── */
+.kelvin-bar-wrap {
+  margin-top: var(--space-3);
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.kelvin-bar {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #ff9d3f,
+    #ffbe76,
+    #ffe4b5,
+    #fff8f0,
+    #f0f4ff,
+    #c8d8ff,
+    #8ab4ff
+  );
+  width: 100%;
+}
+
+.kelvin-marker {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 10px;
+  background: var(--text-primary);
+  border-radius: 1px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  transition: left 200ms ease;
+}
+
+.kelvin-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-1);
+  width: 100%;
+}
+
+.kelvin-labels span {
+  display: inline-block;
+  font-size: 9px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.03em;
+  opacity: 0.6;
+}
+
+/* ─── Slider Unset State ──────────────────────────────────── */
+.slider-unset::-webkit-slider-thumb {
+  background: transparent;
+  border: 2px solid var(--text-tertiary);
+  opacity: 0.4;
+}
+
+.slider-unset::-moz-range-thumb {
+  background: transparent;
+  border: 2px solid var(--text-tertiary);
+  opacity: 0.4;
+}
+
+.slider-unset {
+  opacity: 0.5;
+}
+
+/* ─── Var Label Right (value + reset) ────────────────────── */
+.var-label-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.var-reset {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  line-height: 1;
+  padding: 1px 3px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  opacity: 0.6;
+}
+
+.var-reset:hover {
+  color: var(--text-primary);
+  border-color: var(--border-default);
+  opacity: 1;
+}
+
+/* ─── Kelvin Bar Interactive ──────────────────────────────── */
+.kelvin-bar-interactive {
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.kelvin-bar-interactive:hover {
+  opacity: 0.85;
+}
