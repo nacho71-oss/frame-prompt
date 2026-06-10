@@ -194,6 +194,7 @@ FLUX.2 PRO DIALECT RULES:
 6. POSITIVE-ONLY: No negative prompts.
 7. Shadow quality: be explicit ("deep shadows, hard-edged" / "soft gradient falloff, no crushing")
 8. Atmospheric density: physical description — "light haze softening background detail", "volumetric god rays visible through window glass"
+9. KONTEXT EDITING: When generating an edit prompt (changing an existing image), use explicit keep/change framing: "Keep [subject's face, costume, and lighting] exactly as shown. Change only [the background] to [description]." Be explicit about what must not change — identity preservation takes priority over style override.
 `,
   },
 
@@ -264,6 +265,7 @@ GPT IMAGE 2 DIALECT RULES:
 6. AESTHETIC TREATMENT: Lighting, color palette, overall visual register. Scene's emotional and aesthetic function.
 7. Shadow quality: describe logically ("shadows fall away from the light source, soft-edged due to diffused window quality")
 8. Atmospheric density: describe as physical scene condition ("morning haze diffusing the background, reducing contrast in depth")
+9. VIDEO-READY FRAME: When generating a still intended for image-to-video conversion, include motion cues in the composition — "dust particles suspended mid-air", "fabric mid-billow", "rain streaks mid-fall", "hair caught in wind". Reserve compositional space in the frame for anticipated movement direction.
 `,
   },
 
@@ -303,7 +305,14 @@ SEEDREAM 4.5 DIALECT RULES:
 
   /**
    * SEEDREAM 5 LITE — ByteDance
-   * // APPROXIMATE: 5 Lite specific docs not fully available. Strong baseline from 4.5 family.
+   * Sources: official ByteDance docs + evolink.ai/blog/seedream-prompt-guide (2026)
+   * Characteristics: Reasoning + live web search at generation time. Intent-driven prompts
+   * outperform keyword lists. Distinct behavior from 4.5's pure fidelity-first approach.
+   *
+   * KNOWLEDGE UPDATE (2026-06-10): Confirmed reasoning + live web search architecture.
+   * Intent-driven prompts ("Create a mood board for a neo-noir thriller set in 2040 Singapore")
+   * leverage the model's reasoning chain more effectively than keyword stacking.
+   * For purely technical cinematic output requiring exact spec, Seedream 4.5 is more reliable.
    */
   seedream_5_lite: {
     id: 'seedream_5_lite',
@@ -315,7 +324,7 @@ SEEDREAM 4.5 DIALECT RULES:
     },
     summaryInstruction: `A direct scene description (max 20 words).`,
     systemPromptCore: `
-You are writing for Seedream 5 Lite (ByteDance). This model continues the Seedream family's emphasis on clear, precise natural language over elaborate descriptor stacking.
+You are writing for Seedream 5 Lite (ByteDance). This model has a reasoning + live web search architecture — it reasons through creative intent before generating. Intent-driven prompts outperform keyword stacking for this model.
 
 OUTPUT FORMAT:
 - Generate exactly 3 labeled blocks: SCENE & SUBJECT, AESTHETIC DIRECTION, LIGHT & ATMOSPHERE
@@ -325,14 +334,15 @@ OUTPUT FORMAT:
 - After the blocks, output: SUMMARY: [≤20-word direct scene description]
 
 // APPROXIMATE — Seedream 5 Lite official docs not yet fully published.
-// This dialect uses the Seedream 4.5 baseline from official ByteDance documentation.
+// Dialect uses Seedream 4.5 as the technical baseline.
 
 SEEDREAM 5 LITE DIALECT RULES:
-1. Same concise-and-precise philosophy as 4.5 — clarity over stacking
-2. Lite variant: slightly tighter prompt density for optimal inference
-3. Light direction: state simply and directly — "lit from the left", "backlit", "overhead key"
-4. Named lighting setups work well — Rembrandt, split, butterfly translate accurately
-5. AVOID: ornate vocabulary stacking, vague quality markers, repeat adjectives
+1. REASONING MODE: This model benefits from intent and context in the prompt — include the narrative purpose or director's intent alongside visual description. "For a neo-noir thriller opening title card, create..." is more effective than keyword lists alone.
+2. Same concise-and-precise philosophy as 4.5 — clarity over stacking, even in intent framing
+3. Lite variant: slightly tighter prompt density for optimal inference
+4. Light direction: state simply and directly — "lit from the left", "backlit", "overhead key"
+5. Named lighting setups work well — Rembrandt, split, butterfly translate accurately
+6. AVOID: ornate vocabulary stacking, vague quality markers, repeat adjectives
 `,
   },
 
@@ -342,10 +352,10 @@ SEEDREAM 5 LITE DIALECT RULES:
    * Characteristics: Director-level control. Multi-shot native. Audio-capable.
    * Explicit lighting direction, shadow, and camera behavior language are high-signal.
    *
-   * KNOWLEDGE UPDATE (2026-06-08): Research confirms Seedance 2.0 responds strongly to
-   * explicit light direction language ("hard motivated key from practical neon at camera right,
-   * deep cyan cast, heavy shadows pooling left") over generic mood descriptors. Secondary
-   * motion (fabric, smoke, water) should be described as physical behavior, not just visual.
+   * KNOWLEDGE UPDATE (2026-06-10): Reference tagging syntax confirmed — @Image1, @Video1,
+   * @Audio1 (auto-labeled, up to 9 images + 3 videos + 3 audio). Tags can be used directly
+   * in prompt body: "@Image1 enters the room and walks toward @Image2". Up to 12 reference
+   * files total. Light direction and secondary-motion-as-physics guidance confirmed accurate.
    */
   seedance_2: {
     id: 'seedance_2',
@@ -368,10 +378,11 @@ OUTPUT FORMAT:
 SEEDANCE 2.0 DIALECT RULES:
 1. SCENE & CHARACTER: Establish location and character(s) with physical precision. LIGHT DIRECTION IS THE HIGHEST-SIGNAL VARIABLE — always incorporate it with full directionality: "hard motivated key from practical neon sign at camera right, deep cyan cast, heavy shadows pooling left". Named setups (Rembrandt, split) work well.
 2. SECONDARY MOTION: describe as physical behavior, not appearance — "silk fabric falls under gravity, catching the key light as it settles" not "flowing silk". Hair, fabric, smoke, water — describe the physics.
-3. CAMERA & MOTION: Explicit camera behavior using director/DP terminology. Movement type, speed, axis, focal length behavior. For multi-shot sequences, specify shot transitions.
-4. TEMPORAL & AUDIO: Scene duration intent, pacing, and audio. Audio is generated alongside video — specify ambient sound, music tone, or dialogue. State clearly if silence is intended.
-5. Shadow quality is meaningful — specify density and edge character: "deep shadows with hard edges", "soft fill with no crushing"
-6. Use cinema language: "motivated light source", "practicals", "rack focus from foreground to subject", "handheld follow through doorway"
+3. CAMERA & MOTION: Explicit camera behavior using director/DP terminology. Movement type, speed, axis, focal length behavior. For multi-shot sequences use "lens switch" keyword: "Wide establishing shot of the market. Lens switch to close-up on the vendor's hands."
+4. REFERENCE TAGGING: When reference files are provided, use @Image1, @Image2, @Video1, @Audio1 etc. directly in the prompt body to specify roles: "@Image1 enters the room and walks toward @Image2". Up to 9 images + 3 videos + 3 audio files.
+5. TEMPORAL & AUDIO: Scene duration intent, pacing, and audio. Audio is generated alongside video — specify ambient sound, music tone, or dialogue. State clearly if silence is intended.
+6. Shadow quality is meaningful — specify density and edge character: "deep shadows with hard edges", "soft fill with no crushing"
+7. Use cinema language: "motivated light source", "practicals", "rack focus from foreground to subject", "handheld follow through doorway"
 `,
   },
 
@@ -382,10 +393,11 @@ SEEDANCE 2.0 DIALECT RULES:
    * Characteristics: Physics-first language. 5-part structure. Multi-shot up to 6 angles.
    * Native audio (Omni variant). Frame-level control.
    *
-   * KNOWLEDGE UPDATE (2026-06-08): Kling 3.0 physics-language guidance confirmed —
-   * fabric/fluid descriptions as physical behavior ("heel-first stride, weight transferring
-   * through ball of foot") prevent floating/sliding artifacts more effectively than
-   * motion appearance descriptors. Complex lighting setups now supported in 2.6+.
+   * KNOWLEDGE UPDATE (2026-06-10): 5-part prompt formula confirmed (Camera + Scene + Action
+   * + Vibe/Lighting + Time/Audio). "Shot 1: / Cut to:" multi-shot syntax confirmed accurate.
+   * Motion Control variant: the prompt describes the TARGET scene (subject + environment),
+   * NOT the motion — motion is inferred from the reference video input. Physics-language
+   * guidance and complex lighting support confirmed for 3.0.
    */
   kling_3: {
     id: 'kling_3',
@@ -410,10 +422,11 @@ KLING 3.0 DIALECT RULES:
 2. CHARACTER: Anchor character identity early with consistent physical descriptors. Repeat identical attributes for consistency across shots.
 3. MOTION & PHYSICS: Describe motion as physical behavior with forces — "heel-first stride, weight transferring through ball of foot, slight forward lean, 4–5 feet per second" not "she walks elegantly". Secondary motion (fabric, hair, water) should describe physics: "jacket fabric pulls back from wind resistance, collar lifting"
 4. LIGHTING: Direction is critical — "key from camera left at 45°, practical tungsten, hard shadow right". Complex lighting setups supported in 3.0: "soft key light from camera right mixed with warm practical lamp at background"
-5. CAMERA: Precise cinematography terminology — "slow dolly push on 50mm", "FPV drone rolling 360°", "whip pan right to reveal", "crash push to extreme close-up". Specify camera movement FIRST in this block.
+5. CAMERA: Use the 5-part formula — Camera Movement + Scene Setup + Subject Action + Vibe/Lighting + Time/Audio. Precise terminology: "slow dolly push on 50mm", "FPV drone rolling 360°", "whip pan right to reveal", "crash push to extreme close-up". Specify camera movement FIRST.
 6. AUDIO (Omni variant only): For dialogue: quoted speech with character descriptors. For ambient: describe sound environment. Dialogue max 1–2 short sentences.
-7. MULTI-SHOT: Describe each shot transition explicitly: "First shot: [description]. Cut to: [description]."
-8. Film reference: "Shot on 35mm film, shallow depth of field, realistic cinematic movement" — triggers trained cinematic behavior.
+7. MULTI-SHOT: Label shots explicitly — "Shot 1: [description]. Cut to: [description]. Shot 3: [description]." Character must be re-described consistently in each shot.
+8. MOTION CONTROL VARIANT: When generating for the Motion Control variant, the prompt describes the TARGET scene (subject + environment) — NOT the motion itself. Motion choreography is inferred from the uploaded reference video. Do not describe the motion in the prompt.
+9. Film reference: "Shot on 35mm film, shallow depth of field, realistic cinematic movement" — triggers trained cinematic behavior.
 `,
   },
 
@@ -458,11 +471,12 @@ KLING 2.X DIALECT RULES:
    * Characteristics: Structure-literal (first = most weight). 100–175 word max.
    * Native audio generation — always include. Generates up to 2-minute clips.
    *
-   * KNOWLEDGE UPDATE (2026-06-08): Veo 3.1 field guide confirms audio prompting now
-   * accepts musical genre references ("sparse ambient score, minimal piano, emotional
-   * restraint") for more precise synchronized audio generation. Depth cues (shallow DOF,
-   * foreground parallax, atmospheric haze) significantly improve output quality.
-   * Structured Clip 1 / Clip 2 / Clip 3 format is the most reliable multi-shot approach.
+   * KNOWLEDGE UPDATE (2026-06-10): Official Google prompting guide confirms timestamp-based
+   * multi-shot syntax [00:00-00:02], [00:02-00:04] etc. as the authoritative multi-shot method.
+   * Confirmed audio labeling syntax: quoted dialogue with character attribution, SFX: prefix
+   * for sound effects, "Ambient noise:" prefix for environment, SFX: for score cues.
+   * Audio cues always placed AFTER the visual description in the prompt body.
+   * Depth cues (shallow DOF, foreground parallax, atmospheric haze) improve output quality.
    */
   veo_31: {
     id: 'veo_31',
@@ -488,8 +502,17 @@ VEO 3.1 DIALECT RULES:
 3. LIGHTING: Include in SHOT & SUBJECT — direction is the highest-signal lighting variable. "Key from camera left, motivated by window, soft diffused quality" placed early has maximum effect.
 4. ACTION: Physical specificity for motion and environmental elements. Include depth cues when relevant: "shallow depth of field, foreground parallax with slow dolly, atmospheric haze layering background".
 5. AESTHETICS: Film stock, color grade, visual style. Veo understands Dutch angle, rack focus, dolly zoom with high accuracy.
-6. AUDIO (always include for Veo 3.1): Now accepts musical genre and emotional tone references — "sparse ambient score, minimal piano, emotional restraint" / "natural ambient sound, distant traffic, intimate quiet". Specify silence explicitly if desired. Dialogue max 8–10 seconds natural breath.
-7. KEEP IT TIGHT: One camera movement per generation. No contradictory instructions. Concrete over abstract.
+6. AUDIO (always include for Veo 3.1): Place audio cues AFTER the visual description. Use precise labeling syntax:
+   - Dialogue: A woman says, "We have to leave now." (character attribution + quoted speech)
+   - SFX: thunder cracks in the distance
+   - Ambient noise: the quiet hum of a starship bridge
+   - Score: SFX: A swelling, gentle orchestral score begins to play.
+   Musical genre and emotional tone references work well — "sparse ambient score, minimal piano, emotional restraint". Specify silence explicitly if desired. Dialogue max 8–10 seconds natural breath.
+7. MULTI-SHOT (timestamp syntax — official): Use time-coded segments when multiple shots are needed:
+   [00:00-00:02] Medium shot from behind the explorer...
+   [00:02-00:04] Reverse shot: explorer's face...
+   [00:04-00:06] Tracking shot following...
+8. KEEP IT TIGHT: One camera movement per generation (unless using multi-shot timestamp mode). No contradictory instructions. Concrete over abstract.
 `,
   },
 

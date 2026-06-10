@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { VARIABLE_DEFS, CORE_VAR_KEYS } from '../lib/buildSystemPrompt.js';
 import { isAudioCapable } from '../lib/models.js';
+import ColorPalettePanel from './ColorPalettePanel.jsx';
 
 const KELVIN_POSITIONS = {
   'Candlelight (1800K)':       0.00,
@@ -346,6 +347,12 @@ export default function VariablePanel({ mode, variables, onChange, baseDescripti
             ))}
           </div>
         </Accordion>
+
+        {/* ── COLOR PALETTE ────────────────────────────────── */}
+        <ColorPalettePanel
+          colorPalette={variables.colorPalette}
+          onChange={onChange}
+        />
 
       </div>
     </div>
